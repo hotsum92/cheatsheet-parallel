@@ -56,7 +56,7 @@ parallel --delay 2.5 echo Starting {}\;date ::: 1 2 3
 
 ## parameters
 
-```
+```sh
 parallel echo ::: a b c                       # input
 parallel echo ::: a b c ::: 1 2 3             # multiple inputs
 parallel echo :::: input.txt                  # input from file
@@ -71,7 +71,7 @@ parallel --tagstring {}-bar echo {} ::: A B C # prefixed with argument
 
 ## replace
 
-```
+```sh
 parallel echo {} ::: a b c                                                      # default replace
 parallel echo {.} ::: A/B.C                                                     # remove extension: A/B
 parallel echo {/} ::: A/B.C                                                     # remove path: B.C
