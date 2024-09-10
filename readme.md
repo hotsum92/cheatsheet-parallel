@@ -46,6 +46,7 @@ parallel perl -e \''print "@ARGV\n"'\' ::: a b c
 ```
 Arguments passed to commands through parallel are expanded by the shell twice:
 once in the invocation of parallel, and once when parallel runs your command. -q prevents the second shell expansion.
+This example need -1 because of the space in 'print "@ARGV\n"'
 
 
 ### delay
