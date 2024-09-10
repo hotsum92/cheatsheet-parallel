@@ -87,6 +87,10 @@ parallel echo {1} and {2} ::: A B ::: C D                                       
 parallel echo /={1/} //={1//} /.={1/.} .={1.} ::: A/B.C D/E.F                   # replace with positional
 parallel echo 1={1} 2={2} 3={3} -1={-1} -2={-2} -3={-3} ::: A B ::: C D ::: E F # position replace from behind
 parallel --trim lr echo pre-{}-post ::: ' A '                                   # trim
+parallel echo Job {#} of {= '$_=total_jobs()' =} ::: {1..5}                     # total jobs
+parallel echo {} shell quoted is {= '$_=Q($_)' =} ::: '*/!#$'                   # shell quoted
+parallel echo {= 'if($_==3) { skip() }' =} ::: {1..5}                           # skip
+parallel echo {= 'if($arg[1]==$arg[2]) { skip() }' =} ::: {1..3} ::: {1..3}     # argument skip
 ```
 
 ## one-liner
@@ -95,4 +99,52 @@ parallel --trim lr echo pre-{}-post ::: ' A '                                   
 
 ```sh
 ls | parallel --plus -j 4 -k mv {} {#}.{+.}
+```
+
+##### convert webp to png
+
+```sh
+parallel convert {} {.}.png ::: *.webp
+```
+
+##### count files in directories
+
+```sh
+ls | parallel 'echo -n {}" "; ls {}|wc -l'
+ls | parallel '(echo -n {}" "; ls {}|wc -l) >{}.dir' # save to file
+```
+
+##### check files
+
+```sh
+cat file_list | parallel 'if [ ! -e {} ] ; then echo {}; fi'
+```
+
+##### mv files to first letter directory a-file -> a/a-file
+
+```sh
+parallel 'mkdir -p {=s/(.).*/$1/=}; mv {} {=s/(.).*/$1/=}' ::: *
+```
+
+##### remove two extensions: foo.tar.gz -> foo
+
+```sh
+parallel echo '{= s:\.[^.]+$::;s:\.[^.]+$::; =}' ::: foo.tar.gz
+```
+
+#### find missing 00:00, 00:05, 00:10 ... 23:55
+
+```sh
+parallel [ -f {1}:{2} ] "||" echo {1}:{2} does not exist ::: {00..23} ::: {00..55..5}
+```
+
+##### csv
+
+```
+cat <<'EOF' | parallel --colsep ';' --header : 'echo {=Date s:([0-9]+)/([0-9]+)/([0-9]+):$3/$2/$1:;=} {Name} {Location}'
+Date;Name;Location
+3/8/1978;"Beeblebrox; Zaphod";"Betelgeuse V"
+10/12/1979;"Dent; Arthur";Earth
+1/5/1981;Slartibartfast;Magrathea
+EOF
 ```
