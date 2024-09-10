@@ -77,6 +77,7 @@ parallel echo {.} ::: A/B.C                                                     
 parallel echo {/} ::: A/B.C                                                     # remove path: B.C
 parallel echo {//} ::: A/B.C                                                    # only path: A
 parallel echo {/.} ::: A/B.C                                                    # remove extension and path: B
+parallel --plus echo {+.} ::: A/B.C                                             # extension: C
 parallel --plus echo {/ABC/DEF} ::: /ABC/test.txt                               # change path
 parallel echo {#} ::: a b c                                                     # job number
 parallel -j 2 echo {%} ::: a b c                                                # slot number
@@ -85,4 +86,10 @@ parallel echo {1} and {2} ::: A B ::: C D                                       
 parallel echo /={1/} //={1//} /.={1/.} .={1.} ::: A/B.C D/E.F                   # replace with positional
 parallel echo 1={1} 2={2} 3={3} -1={-1} -2={-2} -3={-3} ::: A B ::: C D ::: E F # position replace from behind
 parallel --trim lr echo pre-{}-post ::: ' A '                                   # trim
+```
+
+## one-liner
+
+```sh
+ls | parallel --plus -j 4 -k mv {} {#}.{+.}
 ```
