@@ -80,6 +80,9 @@ parallel echo {//} ::: A/B.C                                                    
 parallel echo {/.} ::: A/B.C                                                    # remove extension and path: B
 parallel --plus echo {+.} ::: A/B.C                                             # extension: C
 parallel --plus echo {/ABC/DEF} ::: /ABC/test.txt                               # change path
+parallel --plus echo {%_demo} ::: demo_test_demo_demo                           # remove suffix
+parallel --plus echo {#demo_} ::: demo_test_demo_demo                           # remove prefix
+parallel --plus echo {/_demo/} ::: test_demo_demo                               # remove first
 parallel echo {#} ::: a b c                                                     # job number
 parallel -j 2 echo {%} ::: a b c                                                # slot number
 parallel -I ,, echo ,, ::: a b c                                                # replace string
@@ -91,6 +94,7 @@ parallel echo Job {#} of {= '$_=total_jobs()' =} ::: {1..5}                     
 parallel echo {} shell quoted is {= '$_=Q($_)' =} ::: '*/!#$'                   # shell quoted
 parallel echo {= 'if($_==3) { skip() }' =} ::: {1..5}                           # skip
 parallel echo {= 'if($arg[1]==$arg[2]) { skip() }' =} ::: {1..3} ::: {1..3}     # argument skip
+echo 'test' | parallel 'echo {} >&3' 3> >(cat)                                  # redirect
 ```
 
 ## one-liner
@@ -126,6 +130,12 @@ cat file_list | parallel 'if [ ! -e {} ] ; then echo {}; fi'
 parallel 'mkdir -p {=s/(.).*/$1/=}; mv {} {=s/(.).*/$1/=}' ::: *
 ```
 
+##### remove extension
+
+```sh
+parallel --plus echo '{%.gz}' ::: foo.tar.gz
+```
+
 ##### remove two extensions: foo.tar.gz -> foo
 
 ```sh
@@ -147,4 +157,29 @@ Date;Name;Location
 10/12/1979;"Dent; Arthur";Earth
 1/5/1981;Slartibartfast;Magrathea
 EOF
+```
+
+##### function tester
+
+```
+tester() {
+  if (eval "$@") >&/dev/null; then
+    perl -e 'printf "\033[30;102m[ OK ]\033[0m @ARGV\n"' "$@"
+  else
+    perl -e 'printf "\033[30;101m[FAIL]\033[0m @ARGV\n"' "$@"
+  fi
+}
+export -f tester
+parallel tester my_program ::: arg1 arg2
+parallel tester exit ::: 1 0 2 0
+```
+
+##### log rotate
+
+log, log.1, log.2, log.3, log.4, log.5, log.6, log.7, log.8, log.9
+-> log.1, log.2, log.3, log.4, log.5, log.6, log.7, log.8, log.9, log.10
+
+```
+seq 9 -1 1 | parallel -j1 mv log.{} log.'{= $_++ =}'
+mv log log.1
 ```
