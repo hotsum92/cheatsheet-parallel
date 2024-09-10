@@ -90,6 +90,8 @@ parallel --trim lr echo pre-{}-post ::: ' A '                                   
 
 ## one-liner
 
+##### rename files with numbers
+
 ```sh
 ls | parallel --plus -j 4 -k mv {} {#}.{+.}
 ```
